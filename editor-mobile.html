@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Codezy — محرر (نسخة موبايل مستقلة)</title>
+    <style>
+        html,body{height:100%;margin:0;font-family:Arial, Helvetica, sans-serif;background:#1e1e1e;color:#fff}
+        .app{display:flex;flex-direction:column;height:100%}
+        header{padding:10px;background:#111;display:flex;gap:8px;align-items:center}
+        header h1{font-size:16px;margin:0}
+        .controls{display:flex;gap:8px;flex-wrap:wrap}
+        .controls button, .controls select{padding:8px;border-radius:8px;border:none;background:#2a2a2a;color:#fff}
+        #file-tabs{display:flex;gap:6px;overflow:auto;padding:8px;background:#151515}
+        #container{flex:1;display:block}
+        .editor{width:100%;height:100%}
+        @media(min-width:700px){header h1{font-size:18px}}
+    </style>
+</head>
+<body>
+<div class="app">
+    <header>
+        <h1>Codezy — محرر (موبايل)</h1>
+        <div style="flex:1"></div>
+        <div class="controls">
+            <button onclick="run()">تشغيل</button>
+            <button onclick="save()">حفظ</button>
+            <select id="language-selector">
+                <option value="html">HTML</option>
+                <option value="javascript">JavaScript</option>
+                <option value="css">CSS</option>
+            </select>
+        </div>
+    </header>
+
+    <div id="file-tabs"></div>
+    <div id="container"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.0/min/vs/loader.min.js"></script>
+<script>
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.0/min/vs' }});
+    let editors = [], files = [], currentFileIndex = 0;
+    function addNewEditor(filename){
+        const editorContainer = document.createElement('div');
+        editorContainer.className = 'editor';
+        while(document.getElementById('container').firstChild) document.getElementById('container').removeChild(document.getElementById('container').firstChild);
+        document.getElementById('container').appendChild(editorContainer);
+        const editor = monaco.editor.create(editorContainer, {language: document.getElementById('language-selector').value, theme: 'vs-dark', automaticLayout:true});
+        editors[0] = editor;
+    }
+
+    function updateFileTabs(){
+        let html = '';
+        files.forEach((f,i)=>{ html += `<button onclick="switchFile(${i})">${f.name}</button>`});
+        html += '<button onclick="addNewFile()">+</button>';
+        document.getElementById('file-tabs').innerHTML = html;
+    }
+
+    function addNewFile(){
+        const name = prompt('اسم الملف','file'+(files.length+1)+'.html');
+        if(!name) return;
+        files.push({name,content:''});
+        addNewEditor(name);
+        updateFileTabs();
+        currentFileIndex = files.length-1;
+    }
+
+    function switchFile(i){
+        if(!files[i]) return;
+        currentFileIndex=i;
+        editors[0].setValue(files[i].content||'');
+        updateFileTabs();
+    }
+
+    function run(){ const code = editors[0].getValue(); const w=window.open(); if(w){ w.document.write(code); w.document.close(); } }
+    function save(){ const blob = new Blob([editors[0].getValue()],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=files[currentFileIndex]?.name||'code.txt'; a.click(); }
+
+    document.getElementById('language-selector').addEventListener('change', ()=>{ monaco.editor.setModelLanguage(editors[0].getModel(), document.getElementById('language-selector').value); });
+
+    require(['vs/editor/editor.main'], function(){ files.push({name:'index.html',content:'<h1>Hello</h1>'}); addNewEditor('index.html'); updateFileTabs(); switchFile(0); });
+</script>
+</body>
+</html>

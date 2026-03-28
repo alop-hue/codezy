@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Codezy | محرر أكواد متعدد الملفات</title>
+    <link rel="stylesheet" href="css/sandbox.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+           <!-- Firebase SDK -->
+<script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js';
+    import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js';
+    
+    // استبدل هذه البيانات ببيانات مشروعك من Firebase Console
+    const firebaseConfig = {
+         apiKey: "AIzaSyB2zyifmJ74iGUslptichuvVZirVGVMQpA",
+  authDomain: "codezy-ffb04.firebaseapp.com",
+  projectId: "codezy-ffb04",
+  storageBucket: "codezy-ffb04.firebasestorage.app",
+  messagingSenderId: "148041189191",
+  appId: "1:148041189191:web:4efcc056cc3024e7992e62",
+  measurementId: "G-3GS9279RFN"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    
+    window.firebaseAuth = auth;
+    window.firebaseDb = db;
+    window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+    window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+    window.signOut = signOut;
+    window.onAuthStateChanged = onAuthStateChanged;
+    window.doc = doc;
+    window.setDoc = setDoc;
+    window.getDoc = getDoc;
+    window.collection = collection;
+    window.query = query;
+    window.where = where;
+    window.getDocs = getDocs;
+</script>
+    <style>
+        /* تنسيقات إضافية للمحرر */
+        #container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 200px);
+            min-height: 500px;
+        }
+        .editor {
+            width: 100%;
+            flex: 1;
+            border: 1px solid #2a2a2a;
+            background-color: #1e1e2e;
+        }
+        body.light-mode .editor {
+            border-color: #e0e0e0;
+            background-color: #fafafa;
+        }
+        .toolbar {
+            background: #0f0f0f;
+            padding: 10px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #2a2a2a;
+        }
+        body.light-mode .toolbar {
+            background: #f8f8f8;
+            border-bottom-color: #e0e0e0;
+        }
+        button, select {
+            margin: 0;
+            padding: 6px 12px;
+            font-size: 14px;
+            background-color: #2a2a2a;
+            color: #e0e0e0;
+            border: 1px solid #3a3a3a;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        body.light-mode button, body.light-mode select {
+            background-color: #e0e0e0;
+            color: #1a1a1a;
+            border-color: #ccc;
+        }
+        button:hover, select:hover {
+            background-color: #3a3a3a;
+        }
+        .tab-btn {
+            background-color: #2a2a2a;
+            margin-right: 2px;
+        }
+        .tab-btn.active {
+            background-color: #00ff88;
+            color: #0a0a0a;
+        }
+        #file-tabs {
+            margin: 10px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .output-preview {
+            margin-top: 15px;
+            background: #0a0a0a;
+            border-radius: 12px;
+            padding: 10px;
+            border: 1px solid #2a2a2a;
+        }
+        body.light-mode .output-preview {
+            background: #ffffff;
+            border-color: #e0e0e0;
+        }
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        #previewFrame {
+            width: 100%;
+            height: 400px;
+            border: none;
+            background: white;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="dark-mode">
+
+<nav class="navbar">
+    <div id="authLinks" class="auth-buttons">
+
+</div>
+<div id="userInfo" class="user-info" style="display: none;">
+    <i class="fas fa-user-circle"></i>
+    <span id="userName"></span>
+    <span id="userPlan" class="plan-badge free"></span>
+    <button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i></button>
+</div>
+    <div class="container">
+        <div class="logo">
+            <i class="fas fa-code"></i>
+            <span>Codezy</span>
+        </div>
+        <div class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.html">الرئيسية</a></li>
+            <li><a href="courses.html">المسارات</a></li>
+            <li><a href="sandbox.html" class="active">المحرر التجريبي</a></li>
+            <li><a href="projects.html">المشاريع</a></li>
+            <li><a href="#contact">تواصل</a></li>
+        </ul>
+        <button class="theme-toggle" id="themeToggle">
+            <i class="fas fa-moon"></i>
+        </button>
+    </div>
+</nav>
+
+<div class="sandbox-hero">
+    <div class="container">
+        <h1>محرر <span class="highlight">متعدد الملفات</span></h1>
+        <p>اكتب، عدل، وشاهد النتائج فوراً مع علامات تبويب للملفات المتعددة</p>
+          <p id="small">لا يعمل حالياً</p>
+            <div class="full-editor-link">
+            <a href="#" >
+                <i class="fas fa-external-link-alt" ></i>
+                اذهب إلى النسخة التي تعمل
+            </a>
+        <div/>
+    </div>
+</div>
+
+<div class="container">
+    <div class="toolbar">
+        <button id="runBtn"><i class="fas fa-play"></i> تشغيل</button>
+        <button id="saveBtn"><i class="fas fa-save"></i> حفظ</button>
+        <button id="loadBtn"><i class="fas fa-folder-open"></i> تحميل ملف</button>
+        <select id="themeSelector">
+            <option value="vs-dark">داكن</option>
+            <option value="vs-light">فاتح</option>
+            <option value="hc-black">تباين عالي</option>
+        </select>
+        <select id="languageSelector">
+            <option value="html">HTML</option>
+            <option value="javascript">JavaScript</option>
+            <option value="css">CSS</option>
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="cpp">C++</option>
+        </select>
+    </div>
+
+    <div id="file-tabs"></div>
+    <div id="container"></div>
+
+    <div class="output-preview">
+        <div class="output-header">
+            <span><i class="fas fa-eye"></i> معاينة النتيجة</span>
+            <button id="clearOutputBtn" style="background: none; border: none; color: #ff5555;"><i class="fas fa-trash-alt"></i> مسح</button>
+        </div>
+        <iframe id="previewFrame" srcdoc="<h1 style='text-align:center;padding:20px;'>✏️ اضغط 'تشغيل' لرؤية النتيجة</h1>"></iframe>
+    </div>
+</div>
+
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-info">
+                <h3><i class="fas fa-code"></i> Codezy</h3>
+                <p>تعلم البرمجة من الصفر إلى الاحتراف عبر دروس تفاعلية وتحديات عملية ومشاريع حقيقية</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <h4>روابط سريعة</h4>
+                <ul>
+                    <li><a href="index.html">الرئيسية</a></li>
+                    <li><a href="courses.html">المسارات</a></li>
+                    <li><a href="sandbox.html">المحرر التجريبي</a></li>
+                    <li><a href="projects.html">المشاريع</a></li>
+                </ul>
+            </div>
+            <div class="footer-contact">
+                <h4>تواصل معنا</h4>
+                <p><i class="fas fa-envelope"></i> info@codezy.com</p>
+                <p><i class="fab fa-github"></i> github.com/codezy</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Codezy. جميع الحقوق محفوظة. جرب الكود وشاهد النتيجة مباشرة.</p>
+        </div>
+    </div>
+</footer>
+
+
+</body>
+</html>
