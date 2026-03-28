@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Codezy | جرب البرمجة مباشرة</title>
+    <link rel="stylesheet" href="css/playground.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+       <!-- Firebase SDK -->
+<script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js';
+    import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js';
+    
+    // استبدل هذه البيانات ببيانات مشروعك من Firebase Console
+    const firebaseConfig = {
+         apiKey: "AIzaSyB2zyifmJ74iGUslptichuvVZirVGVMQpA",
+  authDomain: "codezy-ffb04.firebaseapp.com",
+  projectId: "codezy-ffb04",
+  storageBucket: "codezy-ffb04.firebasestorage.app",
+  messagingSenderId: "148041189191",
+  appId: "1:148041189191:web:4efcc056cc3024e7992e62",
+  measurementId: "G-3GS9279RFN"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    
+    window.firebaseAuth = auth;
+    window.firebaseDb = db;
+    window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+    window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+    window.signOut = signOut;
+    window.onAuthStateChanged = onAuthStateChanged;
+    window.doc = doc;
+    window.setDoc = setDoc;
+    window.getDoc = getDoc;
+    window.collection = collection;
+    window.query = query;
+    window.where = where;
+    window.getDocs = getDocs;
+</script>
+   <style>
+        /* تنسيقات إضافية للمحرر */
+        #editor-container {
+            height: 450px;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid #2a2a2a;
+        }
+        body.light-mode #editor-container {
+            border-color: #e0e0e0;
+        }
+        .preview-frame {
+            width: 100%;
+            height: 400px;
+            border: none;
+            border-radius: 12px;
+            background: white;
+        }
+        .editor-toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .toolbar-left {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .toolbar-right {
+            display: flex;
+            gap: 10px;
+        }
+        .editor-toolbar button, .editor-toolbar select {
+            padding: 10px 18px;
+            border-radius: 12px;
+            border: 1px solid #2a2a2a;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        body.light-mode .editor-toolbar button, 
+        body.light-mode .editor-toolbar select {
+            background: #ffffff;
+            border-color: #e0e0e0;
+            color: #1a1a1a;
+        }
+        .editor-toolbar button:hover {
+            background: #00ff88;
+            color: #0a0a0a;
+            border-color: #00ff88;
+        }
+        .editor-toolbar select:hover {
+            border-color: #00ff88;
+        }
+        .btn-primary {
+            background: #00ff88 !important;
+            color: #0a0a0a !important;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+        }
+        .examples-section {
+            margin: 30px 0 20px;
+        }
+        .examples-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .examples-title i {
+            color: #00ff88;
+        }
+        .examples-grid {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .example-card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        .example-card:hover {
+            background: #00ff88;
+            color: #0a0a0a;
+            transform: translateY(-2px);
+        }
+        body.light-mode .example-card {
+            background: #ffffff;
+            border-color: #e0e0e0;
+        }
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 25px 0 12px;
+        }
+        .output-header span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        .clear-preview {
+            background: none;
+            border: none;
+            color: #ff5555;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: color 0.3s;
+        }
+        .clear-preview:hover {
+            color: #ff8888;
+        }
+        .download-section {
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid #2a2a2a;
+        }
+        body.light-mode .download-section {
+            border-top-color: #e0e0e0;
+        }
+        .download-title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .download-title h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .download-title p {
+            color: #888;
+        }
+        .download-buttons {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .download-card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            width: 280px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .download-card:hover {
+            transform: translateY(-5px);
+            border-color: #00ff88;
+        }
+        body.light-mode .download-card {
+            background: #ffffff;
+            border-color: #e0e0e0;
+        }
+        .download-icon {
+            font-size: 48px;
+            color: #00ff88;
+            margin-bottom: 15px;
+        }
+        .download-card h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .download-card p {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .download-btn {
+            background: #00ff88;
+            color: #0a0a0a;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .download-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+        }
+        .full-editor-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .full-editor-link a {
+            color: #00ff88;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        .full-editor-link a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 768px) {
+            .editor-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .toolbar-left, .toolbar-right {
+                justify-content: center;
+            }
+            .download-card {
+                width: 100%;
+                max-width: 280px;
+            }
+            #editor-container {
+                height: 350px;
+            }
+            .preview-frame {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body class="dark-mode">
+
+<nav class="navbar">
+    <div id="authLinks" class="auth-buttons">
+</div>
+<div id="userInfo" class="user-info" style="display: none;">
+    <i class="fas fa-user-circle"></i>
+    <span id="userName"></span>
+    <span id="userPlan" class="plan-badge free"></span>
+    <button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i></button>
+</div>
+    <div class="container">
+        <div class="logo">
+            <i class="fas fa-code"></i>
+            <span>Codezy</span>
+        </div>
+        <div class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.html">الرئيسية</a></li>
+            <li><a href="courses.html">المسارات</a></li>
+            <li><a href="playground.html" class="active">جرب البرمجة</a></li>
+            <li><a href="sandbox.html">المحرر المتقدم</a></li>
+            <li><a href="projects.html">المشاريع</a></li>
+            <li><a href="#contact">تواصل</a></li>
+        </ul>
+        <button class="theme-toggle" id="themeToggle">
+            <i class="fas fa-moon"></i>
+        </button>
+    </div>
+</nav>
+
+<section class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1>جرب <span class="highlight">البرمجة مباشرة</span></h1>
+            <p>اكتب الكود وشاهد النتيجة فوراً. جرب HTML, CSS, JavaScript بكل سهولة</p>
+            <p id="small">لا يعمل حالياً</p>
+            <div class="full-editor-link">
+            <a href="#" >
+                <i class="fas fa-external-link-alt" ></i>
+                اذهب إلى النسخة التي تعمل
+            </a>
+        <div/>
+    </div>
+</section>
+
+<section class="editor-section">
+    <div class="container">
+        <!-- شريط الأدوات -->
+        <div class="editor-toolbar">
+            <div class="toolbar-left">
+                <select id="languageSelect">
+                    <option value="html">🌐 HTML</option>
+                    <option value="css">🎨 CSS</option>
+                    <option value="javascript">⚡ JavaScript</option>
+                </select>
+                <button id="runBtn" class="btn-primary">
+                    <i class="fas fa-play"></i> تشغيل
+                </button>
+                <button id="resetBtn">
+                    <i class="fas fa-undo-alt"></i> إعادة تعيين
+                </button>
+            </div>
+            <div class="toolbar-right">
+                <button id="copyBtn">
+                    <i class="fas fa-copy"></i> نسخ
+                </button>
+                <button id="clearBtn">
+                    <i class="fas fa-trash-alt"></i> مسح
+                </button>
+            </div>
+        </div>
+
+        <!-- أمثلة جاهزة -->
+        <div class="examples-section">
+            <div class="examples-title">
+                <i class="fas fa-lightbulb"></i>
+                <span>أمثلة جاهزة للتجربة</span>
+            </div>
+            <div class="examples-grid">
+                <div class="example-card" data-example="hello">
+                    <i class="fas fa-greeting"></i>
+                    <span>Hello World</span>
+                </div>
+                <div class="example-card" data-example="button">
+                    <i class="fas fa-hand-pointer"></i>
+                    <span>زر تفاعلي</span>
+                </div>
+                <div class="example-card" data-example="counter">
+                    <i class="fas fa-calculator"></i>
+                    <span>عداد</span>
+                </div>
+                <div class="example-card" data-example="card">
+                    <i class="fas fa-id-card"></i>
+                    <span>بطاقة تعريف</span>
+                </div>
+                <div class="example-card" data-example="todo">
+                    <i class="fas fa-list-check"></i>
+                    <span>قائمة مهام</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- محرر الكود -->
+        <div id="editor-container"></div>
+
+        <!-- منطقة المعاينة -->
+        <div class="output-header">
+            <span>
+                <i class="fas fa-eye"></i>
+                المعاينة
+            </span>
+            <button id="clearPreviewBtn" class="clear-preview">
+                <i class="fas fa-eraser"></i> مسح المعاينة
+            </button>
+        </div>
+        <iframe id="previewFrame" class="preview-frame" srcdoc="<div style='display:flex;justify-content:center;align-items:center;height:100%;color:#888;font-family:sans-serif;'><div style='text-align:center'><i class='fas fa-code' style='font-size:48px;margin-bottom:15px;display:block'></i>✏️ اكتب الكود واضغط تشغيل</div></div>"></iframe>
+
+        <!-- رابط المحرر المتقدم -->
+        <div class="full-editor-link">
+            <a href="sandbox.html">
+                <i class="fas fa-external-link-alt"></i>
+                اذهب إلى المحرر المتقدم (ملفات متعددة)
+            </a>
+        </div>
+
+        <!-- أزرار تحميل التطبيقات -->
+        <div class="download-section">
+            <div class="download-title">
+                <h2>حمّل <span class="highlight">تطبيقات Codezy</span></h2>
+                <p>جرب تجربة تعلم متكاملة على جهازك</p>
+            </div>
+            <div class="download-buttons">
+                <div class="download-card" id="downloadEditorCard">
+                    <div class="download-icon">
+                        <i class="fas fa-laptop-code"></i>
+                    </div>
+                    <h3>محرر Codezy</h3>
+                    <p>محرر متقدم للتطبيقات المكتبية - جرب البرمجة باحترافية</p>
+                    <button class="download-btn" id="editorDownloadBtn">
+                        <i class="fas fa-download"></i> تحميل
+                    </button>
+                </div>
+                <div class="download-card" id="downloadAppCard">
+                    <div class="download-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3>تطبيق تعلم البرمجة</h3>
+                    <p>تعلم البرمجة من الصفر إلى الاحتراف على هاتفك</p>
+                    <button class="download-btn" id="appDownloadBtn">
+                        <i class="fas fa-download"></i> تحميل
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-info">
+                <h3><i class="fas fa-code"></i> Codezy</h3>
+                <p>تعلم البرمجة من الصفر إلى الاحتراف عبر دروس تفاعلية وتحديات عملية ومشاريع حقيقية</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <h4>روابط سريعة</h4>
+                <ul>
+                    <li><a href="index.html">الرئيسية</a></li>
+                    <li><a href="courses.html">المسارات</a></li>
+                    <li><a href="playground.html">جرب البرمجة</a></li>
+                    <li><a href="sandbox.html">المحرر المتقدم</a></li>
+                    <li><a href="projects.html">المشاريع</a></li>
+                </ul>
+            </div>
+            <div class="footer-contact">
+                <h4>تواصل معنا</h4>
+                <p><i class="fas fa-envelope"></i> info@codezy.com</p>
+                <p><i class="fab fa-github"></i> github.com/codezy</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Codezy. جميع الحقوق محفوظة. جرب البرمجة مباشرة وتعلم بسهولة.</p>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

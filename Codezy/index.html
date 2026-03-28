@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Codezy | تعلم البرمجة من الصفر إلى الاحتراف</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <!-- Firebase SDK -->
+<script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js';
+    import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js';
+    
+    // استبدل هذه البيانات ببيانات مشروعك من Firebase Console
+    const firebaseConfig = {
+         apiKey: "AIzaSyB2zyifmJ74iGUslptichuvVZirVGVMQpA",
+  authDomain: "codezy-ffb04.firebaseapp.com",
+  projectId: "codezy-ffb04",
+  storageBucket: "codezy-ffb04.firebasestorage.app",
+  messagingSenderId: "148041189191",
+  appId: "1:148041189191:web:4efcc056cc3024e7992e62",
+  measurementId: "G-3GS9279RFN"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    
+    window.firebaseAuth = auth;
+    window.firebaseDb = db;
+    window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+    window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+    window.signOut = signOut;
+    window.onAuthStateChanged = onAuthStateChanged;
+    window.doc = doc;
+    window.setDoc = setDoc;
+    window.getDoc = getDoc;
+    window.collection = collection;
+    window.query = query;
+    window.where = where;
+    window.getDocs = getDocs;
+</script>
+</head>
+<body class="dark-mode">
+
+<!-- شريط التنقل -->
+<nav class="navbar">
+    <div id="authLinks" class="auth-buttons">
+
+</div>
+<div id="userInfo" class="user-info" style="display: none;">
+    <i class="fas fa-user-circle"></i>
+    <span id="userName"></span>
+    <span id="userPlan" class="plan-badge free"></span>
+    <button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i></button>
+</div>
+    <div class="container">
+        <div class="logo">
+            <i class="fas fa-code"></i>
+            <span>Codezy</span>
+        </div>
+        <div class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#home" class="active">الرئيسية</a></li>
+            <li><a href="#features">المميزات</a></li>
+            <li><a href="courses.html">المسارات</a></li>
+            <li><a href="#examples">أمثلة تفاعلية</a></li>
+            <li><a href="#tech">التقنيات</a></li>
+            <li><a href="sandbox.html">المحرر التجريبي</a></li>
+            <li><a href="playground.html">جرب البرمجة</a></li>
+            <li><a href="#contact">تواصل</a></li>
+             <li><a href="#subscription.html">الاشتراكات</a></li>
+        </ul>
+        <button class="theme-toggle" id="themeToggle">
+            <i class="fas fa-moon"></i>
+        </button>
+    </div>
+</nav>
+
+<!-- القسم الرئيسي -->
+<section id="home" class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1>تعلم البرمجة <span class="highlight">من الصفر إلى الاحتراف</span></h1>
+            <p class="hero-subtitle">عبر دروس تفاعلية وتحديات عملية ومشاريع حقيقية</p>
+            <div class="buttons">
+                <a href="courses.html" class="btn-primary">
+                    <i class="fas fa-play"></i> ابدأ رحلتك الآن
+                </a>
+                <a href="sandbox.html" class="btn-secondary">
+                    <i class="fas fa-laptop-code"></i> جرب المحرر
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- قسم الأمثلة التفاعلية (مشابه للصورة) -->
+<section id="examples" class="examples-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>أمثلة تفاعلية</h2>
+            <p>جرب الكود بنفسك وشاهد النتيجة فوراً</p>
+        </div>
+        
+        <div class="code-example">
+            <div class="code-header">
+                <div class="code-title">
+                    <i class="fab fa-python"></i>
+                    <span>مثال: التحقق من الأعداد الأولية</span>
+                </div>
+                <div class="code-actions">
+                    <button class="copy-code-btn" data-code="primeCode">
+                        <i class="fas fa-copy"></i> نسخ
+                    </button>
+                    <button class="run-code-btn" data-code="primeCode">
+                        <i class="fas fa-play"></i> تشغيل
+                    </button>
+                </div>
+            </div>
+            <div class="code-block">
+                <pre><code id="primeCode" class="language-python">def is_prime(n):
+    if n < 2:
+        return False
+    for i in range(2, int(n**0.5) + 1):
+        if n % i == 0:
+            return False
+    return True
+
+# اختبار الدالة
+print(is_prime(17))  # يجب أن يعرض True
+print(is_prime(20))  # يجب أن يعرض False</code></pre>
+            </div>
+            <div class="code-output" id="primeOutput">
+                <div class="output-placeholder">
+                    <i class="fas fa-terminal"></i>
+                    <span>اضغط "تشغيل" لرؤية النتيجة</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="code-example">
+            <div class="code-header">
+                <div class="code-title">
+                    <i class="fab fa-js"></i>
+                    <span>مثال: دالة الترحيب</span>
+                </div>
+                <div class="code-actions">
+                    <button class="copy-code-btn" data-code="greetingCode">
+                        <i class="fas fa-copy"></i> نسخ
+                    </button>
+                    <button class="run-code-btn" data-code="greetingCode">
+                        <i class="fas fa-play"></i> تشغيل
+                    </button>
+                </div>
+            </div>
+            <div class="code-block">
+                <pre><code id="greetingCode" class="language-javascript">function greet(name) {
+    return `مرحباً يا ${name}！`;
+}
+
+console.log(greet("مبرمج"));
+console.log(greet("عالم"));</code></pre>
+            </div>
+            <div class="code-output" id="greetingOutput">
+                <div class="output-placeholder">
+                    <i class="fas fa-terminal"></i>
+                    <span>اضغط "تشغيل" لرؤية النتيجة</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="code-example">
+            <div class="code-header">
+                <div class="code-title">
+                    <i class="fas fa-calculator"></i>
+                    <span>مثال: جمع الأعداد</span>
+                </div>
+                <div class="code-actions">
+                    <button class="copy-code-btn" data-code="sumCode">
+                        <i class="fas fa-copy"></i> نسخ
+                    </button>
+                    <button class="run-code-btn" data-code="sumCode">
+                        <i class="fas fa-play"></i> تشغيل
+                    </button>
+                </div>
+            </div>
+            <div class="code-block">
+                <pre><code id="sumCode" class="language-python">def calculate_sum(numbers):
+    total = 0
+    for num in numbers:
+        total += num
+    return total
+
+# تجربة الدالة
+my_numbers = [10, 20, 30, 40, 50]
+result = calculate_sum(my_numbers)
+print(f"مجموع الأعداد {my_numbers} = {result}")</code></pre>
+            </div>
+            <div class="code-output" id="sumOutput">
+                <div class="output-placeholder">
+                    <i class="fas fa-terminal"></i>
+                    <span>اضغط "تشغيل" لرؤية النتيجة</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- قسم المميزات -->
+<section id="features" class="features">
+    <div class="container">
+        <div class="section-header">
+            <h2>مميزات التطبيق</h2>
+            <p>تجربة تعليمية متكاملة تناسب الجميع</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="icon"><i class="fas fa-graduation-cap"></i></div>
+                <h3>دروس منظمة</h3>
+                <p>مسارات تعليمية من الصفر إلى الاحتراف</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon"><i class="fas fa-tasks"></i></div>
+                <h3>تحديات عملية</h3>
+                <p>تمارين تفاعلية لتطبيق ما تتعلمه</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon"><i class="fas fa-project-diagram"></i></div>
+                <h3>مشاريع حقيقية</h3>
+                <p>ابنِ مشاريع حقيقية تضاف إلى محفظتك</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon"><i class="fas fa-trophy"></i></div>
+                <h3>نظام تحفيزي</h3>
+                <p>شهادات وإنجازات تحفزك على الاستمرار</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- قسم التقنيات -->
+<section id="tech" class="tech-stack">
+    <div class="container">
+        <div class="section-header">
+            <h2>التقنيات المستخدمة</h2>
+            <p>بُنِي التطبيق بأحدث التقنيات</p>
+        </div>
+        <div class="tech-grid">
+            <div class="tech-item"><i class="fab fa-java"></i><span>Java 17</span></div>
+            <div class="tech-item"><i class="fab fa-android"></i><span>Android SDK</span></div>
+            <div class="tech-item"><i class="fas fa-database"></i><span>Room Database</span></div>
+            <div class="tech-item"><i class="fas fa-fire"></i><span>Firebase</span></div>
+            <div class="tech-item"><i class="fas fa-code-branch"></i><span>MVVM</span></div>
+            <div class="tech-item"><i class="fas fa-cloud"></i><span>REST APIs</span></div>
+        </div>
+    </div>
+</section>
+
+<!-- قسم التواصل -->
+<section id="contact" class="contact">
+    <div class="container">
+        <div class="contact-content">
+            <h2>هل أنت مستعد لبدء رحلة التعلم؟</h2>
+            <p>انضم إلى آلاف المبرمجين الذين بدأوا رحلتهم مع Codezy</p>
+            <div class="contact-buttons">
+                <a href="#" class="btn-google">
+                    <i class="fab fa-google-play"></i>
+                    <div>
+                        <small>متوفر على</small>
+                        <span>Google Play</span>
+                    </div>
+                </a>
+                <a href="https://github.com" class="btn-github">
+                    <i class="fab fa-github"></i>
+                    <div>
+                        <small>استعرض</small>
+                        <span>الكود المصدري</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-info">
+                <h3><i class="fas fa-code"></i> Codezy</h3>
+                <p>تعلم البرمجة من الصفر إلى الاحتراف عبر دروس تفاعلية وتحديات عملية ومشاريع حقيقية</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <h4>روابط سريعة</h4>
+                <ul>
+                    <li><a href="#home">الرئيسية</a></li>
+                    <li><a href="#features">المميزات</a></li>
+                    <li><a href="#examples">أمثلة تفاعلية</a></li>
+                    <li><a href="sandbox.html">المحرر التجريبي</a></li>
+                </ul>
+            </div>
+            <div class="footer-contact">
+                <h4>تواصل معنا</h4>
+                <p><i class="fas fa-envelope"></i> info@codezy.com</p>
+                <p><i class="fab fa-github"></i> github.com/codezy</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Codezy. جميع الحقوق محفوظة. تعلم البرمجة بالطريقة الصحيحة.</p>
+        </div>
+    </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
